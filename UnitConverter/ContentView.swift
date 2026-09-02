@@ -1,128 +1,142 @@
-    //
-    //  ContentView.swift
-    //  UnitConverter
-    //
-    //  Created by Ruvaid on 02/08/26.
-    //
+//
+//  ContentView.swift
+//  UnitConverter
+//
+//  Created by Ruvaid on 02/08/26.
+//
 
-    import SwiftUI
+import SwiftUI
 
-    enum TemperatureUnit: String, CaseIterable {
-        case celsius = "Celsius"
-        case fahrenheit = "Fahrenheit"
-        case kelvin = "Kelvin"
+enum TemperatureUnit: String, CaseIterable {
+    case celsius = "Celsius"
+    case fahrenheit = "Fahrenheit"
+    case kelvin = "Kelvin"
 
-        var symbol: String {
-            switch self {
-            case .celsius:
-                return "°C"
-            case .fahrenheit:
-                return "°F"
-            case .kelvin:
-                return "K"
-            }
+    var symbol: String {
+        switch self {
+        case .celsius:
+            return "°C"
+        case .fahrenheit:
+            return "°F"
+        case .kelvin:
+            return "K"
+        }
+    }
+}
+
+struct ContentView: View {
+    @State private var inputTemperature = 0.0
+    @State private var inputUnit: TemperatureUnit = .celsius
+    @State private var outputUnit: TemperatureUnit = .fahrenheit
+    @State private var isThermometerAnimating = false
+
+    @FocusState private var inputIsFocused: Bool
+
+    var convertedTemperature: Double {
+        // Step 1: Convert the input temperature to the base unit (Celsius)
+        let celsiusValue: Double
+
+        switch inputUnit {
+        case .celsius:
+            celsiusValue = inputTemperature
+
+        case .fahrenheit:
+            celsiusValue = (inputTemperature - 32) * 5 / 9
+
+        case .kelvin:
+            celsiusValue = inputTemperature - 273.15
+        }
+
+        // Step 2: Convert from Celsius to the selected output unit
+        switch outputUnit {
+        case .celsius:
+            return celsiusValue
+
+        case .fahrenheit:
+            return (celsiusValue * 9 / 5) + 32
+
+        case .kelvin:
+            return celsiusValue + 273.15
         }
     }
 
-    struct ContentView: View {
-        @State private var inputTemperature = 0.0
-        @State private var inputUnit: TemperatureUnit = .celsius
-        @State private var outputUnit: TemperatureUnit = .fahrenheit
+    var body: some View {
+        NavigationStack {
+            ZStack {
+                LinearGradient(
+                    colors: [
+                        Color.blue.opacity(0.7),
+                        Color.purple.opacity(0.6),
+                        Color.indigo.opacity(0.8)
+                    ],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+                .ignoresSafeArea()
 
-        @FocusState private var inputIsFocused: Bool
+                Form {
+                    Section("Enter Temperature") {
+                        TextField(
+                            "Temperature",
+                            value: $inputTemperature,
+                            format: .number
+                        )
+                        .keyboardType(.decimalPad)
+                        .focused($inputIsFocused)
+                    }
 
-        var convertedTemperature: Double {
-
-            // Step 1: Convert the input temperature to the base unit (Celsius)
-            let celsiusValue: Double
-
-            switch inputUnit {
-            case .celsius:
-                celsiusValue = inputTemperature
-
-            case .fahrenheit:
-                celsiusValue = (inputTemperature - 32) * 5 / 9
-
-            case .kelvin:
-                celsiusValue = inputTemperature - 273.15
-            }
-
-            // Step 2: Convert from Celsius to the selected output unit
-            switch outputUnit {
-            case .celsius:
-                return celsiusValue
-
-            case .fahrenheit:
-                return (celsiusValue * 9 / 5) + 32
-
-            case .kelvin:
-                return celsiusValue + 273.15
-            }
-        }
-
-        var body: some View {
-            NavigationStack {
-                ZStack {
-                    LinearGradient(
-                        colors: [
-                            Color.blue.opacity(0.7),
-                            Color.purple.opacity(0.6),
-                            Color.indigo.opacity(0.8)
-                        ],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                    .ignoresSafeArea()
-                    
-                    Form {
-                        Section("Enter Temperature") {
-                            TextField(
-                                "Temperature",
-                                value: $inputTemperature,
-                                format: .number
-                            )
-                            .keyboardType(.decimalPad)
-                            .focused($inputIsFocused)
-                        }
-                        
-            
-                        Section("From") {
-                            Picker("Input Unit", selection: $inputUnit) {
-                                ForEach(TemperatureUnit.allCases, id: \.self) { unit in
-                                    Text(unit.rawValue)
-                                }
+                    Section("From") {
+                        Picker("Input Unit", selection: $inputUnit) {
+                            ForEach(TemperatureUnit.allCases, id: \.self) { unit in
+                                Text(unit.rawValue)
                             }
-                            .pickerStyle(.segmented)
                         }
-                        
-                        Section("To") {
-                            Picker("Output Unit", selection: $outputUnit) {
-                                ForEach(TemperatureUnit.allCases, id: \.self) { unit in
-                                    Text(unit.rawValue)
-                                }
+                        .pickerStyle(.segmented)
+                    }
+
+                    Section("To") {
+                        Picker("Output Unit", selection: $outputUnit) {
+                            ForEach(TemperatureUnit.allCases, id: \.self) { unit in
+                                Text(unit.rawValue)
                             }
-                            .pickerStyle(.segmented)
                         }
-                        
-                        Section("Converted Temperature") {
+                        .pickerStyle(.segmented)
+                    }
+
+                    Section("Converted Temperature") {
+                        HStack(spacing: 12) {
+                            Image(systemName: "thermometer.medium")
+                                .font(.title2)
+                                .foregroundStyle(.orange)
+                                .rotationEffect(.degrees(isThermometerAnimating ? 8 : -8))
+                                .animation(
+                                    .easeInOut(duration: 1.2).repeatForever(autoreverses: true),
+                                    value: isThermometerAnimating
+                                )
+
                             Text("\(convertedTemperature.formatted()) \(outputUnit.symbol)")
+                                .font(.title2.weight(.semibold))
                         }
-                        
+                        .padding(.vertical, 4)
                     }
-                    .scrollContentBackground(.hidden)
-                    .navigationTitle("Unit Converter")
-                    .toolbar {
-                        if inputIsFocused {
-                            Button("Done") {
-                                inputIsFocused = false
-                            }
+                }
+                .scrollContentBackground(.hidden)
+                .navigationTitle("Unit Converter")
+                .toolbar {
+                    if inputIsFocused {
+                        Button("Done") {
+                            inputIsFocused = false
                         }
                     }
+                }
+                .onAppear {
+                    isThermometerAnimating = true
                 }
             }
         }
     }
+}
 
-    #Preview {
-        ContentView()
-    }
+#Preview {
+    ContentView()
+}
