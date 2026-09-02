@@ -28,7 +28,6 @@ struct ContentView: View {
     @State private var inputTemperature = 0.0
     @State private var inputUnit: TemperatureUnit = .celsius
     @State private var outputUnit: TemperatureUnit = .fahrenheit
-    @State private var isThermometerAnimating = false
 
     @FocusState private var inputIsFocused: Bool
 
@@ -104,20 +103,7 @@ struct ContentView: View {
                     }
 
                     Section("Converted Temperature") {
-                        HStack(spacing: 12) {
-                            Image(systemName: "thermometer.medium")
-                                .font(.title2)
-                                .foregroundStyle(.orange)
-                                .rotationEffect(.degrees(isThermometerAnimating ? 8 : -8))
-                                .animation(
-                                    .easeInOut(duration: 1.2).repeatForever(autoreverses: true),
-                                    value: isThermometerAnimating
-                                )
-
-                            Text("\(convertedTemperature.formatted()) \(outputUnit.symbol)")
-                                .font(.title2.weight(.semibold))
-                        }
-                        .padding(.vertical, 4)
+                        Text("\(convertedTemperature.formatted()) \(outputUnit.symbol)")
                     }
                 }
                 .scrollContentBackground(.hidden)
@@ -128,9 +114,6 @@ struct ContentView: View {
                             inputIsFocused = false
                         }
                     }
-                }
-                .onAppear {
-                    isThermometerAnimating = true
                 }
             }
         }
