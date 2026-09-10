@@ -65,7 +65,7 @@ struct ContentView: View {
                 LinearGradient(
                     colors: [
                         Color.blue.opacity(0.7),
-                        Color.purple.opacity(0.6),
+                        Color.purple.opacity(0.7),
                         Color.indigo.opacity(0.8)
                     ],
                     startPoint: .topLeading,
